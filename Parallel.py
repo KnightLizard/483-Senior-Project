@@ -11,7 +11,7 @@ import multiprocessing
 def preprocessing():
     #some images to try, the threshold is only designed for the satellite data (not the thumbnail)
     #img = cv2.imread('download (2).jpg', cv2.IMREAD_GRAYSCALE) 
-    img = cv2.imread('images/LC08/LC08_L2SP_022029_20130329_20200912_02_T1_SR_B5.jpg', cv2.IMREAD_GRAYSCALE)
+    img = cv2.imread('images/LC08_L2SP_022029_20130329_20200912_02_T1_SR_B5.jpg', cv2.IMREAD_GRAYSCALE)
     #img = cv2.imread('LC08_L2SP_022029_20130329_20200912_02_T1_SR_B5_quart.jpg', cv2.IMREAD_GRAYSCALE) #quarter size
     #img = cv2.imread('LC08_L2SP_022029_20130329_20200912_02_T1_thumb_large.jpeg', cv2.IMREAD_GRAYSCALE) #colored 
   

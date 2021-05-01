@@ -7,11 +7,11 @@ from sklearn.cluster import KMeans
 import time
 import os
 
+os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
+
 #Preprocesses image for land-water classification and KMeans clustering
 #Returns a binary mask of the image
 def preprocessing(img, imageID):
-  print(imageID)
-
   #Blur and alter shape for ML model
   #To avoid overfitting and have proper format for training
   img = cv2.GaussianBlur(img, (3,3), 0)
