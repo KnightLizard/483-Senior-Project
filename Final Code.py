@@ -25,10 +25,10 @@ def preprocessing(img, imageID, doKMeans = False):
   if(doKMeans):
     #Blur to reduce noise
     img = cv2.GaussianBlur(img, (3,3), 0)
-    rows, cols, rgb = img.shape
+    rows, cols = img.shape
     
     #For training ML model
-    reshaped_img = img.reshape(rows*cols, 3)
+    reshaped_img = img.reshape(rows*cols, 1)
     
     #Making binary np array of coastline
     kmeans = KMeans(2)
@@ -49,7 +49,7 @@ def preprocessing(img, imageID, doKMeans = False):
     #Blur to reduce noise
     test = cv2.GaussianBlur(img, (13,13), 0)
     #Water in the data set is mostly gray value 28, 45 reduces noise
-    ret, test = cv2.threshold(test, 28, 255, cv2.THRESH_BINARY_INV)
+    ret, test = cv2.threshold(test, 45, 255, cv2.THRESH_BINARY)
 
     test_edges = cv2.Canny(test, 2, 5)
     
@@ -62,7 +62,7 @@ images_ID = []
 count = 0
 
 for imagePath in os.listdir('images'):
-  images.append(cv2.imread('images/'+imagePath, cv2.COLOR_BGR2RGB))
+  images.append(cv2.imread('images/'+imagePath, cv2.IMREAD_GRAYSCALE))
   images_ID.append(count)
   count += 1
 
