@@ -8,6 +8,7 @@ import os
 
 #Change string to absolute directory on your machine
 os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
+total_size = 1.67 #MB of data in image directory
 
 #Implements edge detection algorithm (Canny Algorithm)
 def detectShoreline(image, imageID):
@@ -71,7 +72,7 @@ def serial():
   for i in range(len(images)):
     preprocessing(images[i], i)
   endTime = time.time()
-  print('Serial Execution Time:', endTime - startTime)
+  print('Serial Execution Time:', endTime - startTime, 'Mb/s:', total_size/(endTime - startTime))
 
 #Begin Parallel Execution
 iterable = [(images[i], i) for i in range(len(images))]
@@ -82,8 +83,8 @@ def parallelize(images_subset, image_ID):
     preprocessing(images_subset[i], image_ID[i])
 
 #Parallel method
-def alternateParallel():
-  num_threads = 16 #Change number of threads in parallel execution
+def alternateParallel(num_threads = 1):
+  #num_threads = 5 #Change number of threads in parallel execution
   interval = int(len(iterable)/num_threads) #Size of grouping for each processor
   threads = []
 
@@ -106,8 +107,10 @@ def alternateParallel():
   for t in threads:
     t.join()
   endTime = time.time()
-  print('Alt Parallel Algo Time: ', endTime - startTime)
+  print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', endTime - startTime, 'Mb/s:', total_size/(endTime - startTime))
 
 serial()
 #originalParallel()
 alternateParallel()
+for i in range(2, 34, 2):
+  alternateParallel(i)
