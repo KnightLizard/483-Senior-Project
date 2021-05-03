@@ -24,7 +24,7 @@ def detectShoreline(image, imageID):
 def preprocessing(img, imageID, doKMeans = False):
   if(doKMeans):
     #Blur to reduce noise
-    img = cv2.GaussianBlur(img, (3,3), 0)
+    img = cv2.GaussianBlur(img, (13,13), 0)
     rows, cols = img.shape
     
     #For training ML model
@@ -42,17 +42,18 @@ def preprocessing(img, imageID, doKMeans = False):
     
     #Get Edges and display
     edges = cv2.Canny(binary_mask, 2, 5)
-    
+   
     detectShoreline(edges, imageID)
     
   else:
     #Blur to reduce noise
     test = cv2.GaussianBlur(img, (13,13), 0)
+    
     #Water in the data set is mostly gray value 28, 45 reduces noise
-    ret, test = cv2.threshold(test, 45, 255, cv2.THRESH_BINARY)
+    ret, test = cv2.threshold(test, 45, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
     test_edges = cv2.Canny(test, 2, 5)
-    
+
     detectShoreline(test_edges, imageID)
 
 
