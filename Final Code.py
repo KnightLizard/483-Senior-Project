@@ -7,7 +7,10 @@ import time
 import os
 
 #Change string to absolute directory on your machine
-os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
+absPath = os.path.abspath(__file__)
+absPath = absPath[0:absPath.rindex('\\')]
+os.chdir(absPath)
+#os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
 total_size = 1.67 #MB of data in image directory
 
 #Implements edge detection algorithm (Canny Algorithm)
@@ -41,9 +44,9 @@ def preprocessing(img, imageID, doKMeans = False):
     binary_mask = np.uint8(binary_mask)
     
     #Get Edges and display
-    edges = cv2.Canny(binary_mask, 2, 5)
+    #edges = cv2.Canny(binary_mask, 2, 5)
    
-    detectShoreline(edges, imageID)
+    detectShoreline(binary_mask, imageID)
     
   else:
     #Blur to reduce noise
@@ -52,9 +55,9 @@ def preprocessing(img, imageID, doKMeans = False):
     #Water in the data set is mostly gray value 28, 45 reduces noise
     ret, test = cv2.threshold(test, 45, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
 
-    test_edges = cv2.Canny(test, 2, 5)
+    #test_edges = cv2.Canny(test, 2, 5)
 
-    detectShoreline(test_edges, imageID)
+    detectShoreline(test, imageID)
 
 
 #Load in all images in directory
@@ -71,7 +74,7 @@ for imagePath in os.listdir('images'):
 def serial():
   startTime = time.time()
   for i in range(len(images)):
-    preprocessing(images[i], i)
+    preprocessing(images[i], str(i) + "s")
   endTime = time.time()
   print('Serial Execution Time:', endTime - startTime, 'Mb/s:', total_size/(endTime - startTime))
 
@@ -81,7 +84,7 @@ iterable = [(images[i], i) for i in range(len(images))]
 #Works with code snippet below to parallelize serial version
 def parallelize(images_subset, image_ID):
   for i in range(len(images_subset)):
-    preprocessing(images_subset[i], image_ID[i])
+    preprocessing(images_subset[i], str(image_ID[i]) + "p")
 
 #Parallel method
 def alternateParallel(num_threads = 1):

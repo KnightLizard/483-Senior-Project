@@ -8,6 +8,9 @@ import time
 import multiprocessing
 import os
 
+absPath = os.path.abspath(__file__)
+absPath = absPath[0:absPath.rindex('\\')]
+os.chdir(absPath)
 #os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
 total_size = 100
 
@@ -36,7 +39,7 @@ def preprocessing(id, left, right):
     test = cv2.GaussianBlur(img, (13,13), 0)
     
     #Water in the data set is mostly gray value 28, 45 reduces noise
-    ret, test = cv2.threshold(test, 28, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
+    ret, test = cv2.threshold(test, 32, 255, cv2.THRESH_BINARY)
     #test_edges = cv2.Canny(test, 2, 5)
 
     #print(left, right)
@@ -68,8 +71,8 @@ def alternateParallel(num_threads = 1):
     #print(row, col)
     interval = int(row/num_threads)
     for j in range(num_threads):
-        if ((i + 1) * interval) >= row:
-            threads.append(threading.Thread(target=parallelize, args=(i,j*interval,col)))
+        if (j == num_threads - 1):
+            threads.append(threading.Thread(target=parallelize, args=(i,j*interval,row)))
         #break
         else:
             threads.append(threading.Thread(target=parallelize, args=(i,j*interval,(j + 1)*interval)))
