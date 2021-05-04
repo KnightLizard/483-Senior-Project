@@ -27,11 +27,11 @@ def detectShoreline(image, imageID):
 def preprocessing(img, imageID, doKMeans = False):
   if(doKMeans):
     #Blur to reduce noise
-    img = cv2.GaussianBlur(img, (13,13), 0)
-    rows, cols = img.shape
+    img2 = cv2.GaussianBlur(img, (13,13), 0)
+    rows, cols = img2.shape
     
     #For training ML model
-    reshaped_img = img.reshape(rows*cols, 1)
+    reshaped_img = img2.reshape(rows*cols, 1)
     
     #Making binary np array of coastline
     kmeans = KMeans(2)

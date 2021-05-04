@@ -25,10 +25,7 @@ def loadImages():
 def detectShoreline(image, id, left, right):
   #Get Edges and display
   edges = cv2.Canny(image, 2, 5)
-  #print(left, right)  
-  
   #Save images to direcrtory
-  #cv2.imwrite("Edge images/"+str(imageID)+'.jpg', edges)
   images[id][left:right] = edges
 
 #Preprocesses image for land-water classification and KMeans clustering
@@ -42,8 +39,6 @@ def preprocessing(id, left, right):
     ret, test = cv2.threshold(test, 32, 255, cv2.THRESH_BINARY)
     #test_edges = cv2.Canny(test, 2, 5)
 
-    #print(left, right)
-
     detectShoreline(test, id, left, right)
 
 #Begin Serial preprocessing and shoreline detection
@@ -53,18 +48,62 @@ def serial():
   for i in range(len(images)):
     preprocessing(i, 0, len(images[i]))
     endTime = time.time()
+    #cv2.imwrite('satOut/sat{}serial.jpg'.format(i),images[i])
+  for i in range(len(images)):
     cv2.imwrite('satOut/sat{}serial.jpg'.format(i),images[i])
   
   print('Serial Execution Time:', endTime - startTime, 'Mb/s:', total_size/(endTime - startTime))
 
 #Works with code snippet below to parallelize serial version
 def parallelize(id, left, right):
+    #preprocessingPar(id, left, right, imagesIn)
     preprocessing(id, left, right)
+    #time.sleep(1)
 
-#Parallel method
+def worker(rank):
+    imagesAlt = []
+    count = 0
+    for imagePath in os.listdir('sat'):
+        if(count % var_dict['numProcs'] == rank):
+            imagesAlt.append(cv2.imread('sat/'+imagePath, cv2.IMREAD_GRAYSCALE))
+        count = count + 1
+            
+    for i in range(len(imagesAlt)):
+        img = imagesAlt[i]
+        test = cv2.GaussianBlur(img, (13,13), 0)
+    
+        #Water in the data set is mostly gray value 28, 45 reduces noise
+        ret, test = cv2.threshold(test, 32, 255, cv2.THRESH_BINARY)
+        edges = cv2.Canny(test, 2, 5)
+        imagesAlt[i] = edges
+    for i in range(len(imagesAlt)):
+        cv2.imwrite('satOut/sat{}serial.jpg'.format(i * var_dict['numProcs'] + rank),imagesAlt[i])
+
+#set up shared data between the processes
+var_dict = {}
+def initWorkerData(numProcs):
+    var_dict['numProcs'] = numProcs
+    
+    
+#File decomposition parallel method
+def fileLevelParallel(num_threads = 1):
+  startTime = time.time()
+  
+  numProcesses = 4
+  with multiprocessing.Pool(processes=numProcesses, initializer=initWorkerData, initargs=(numProcesses,)) as pool:
+      pool.map(worker, range(numProcesses))
+      
+  endTime = time.time()
+  total_time = endTime - startTime
+  
+  print('Num Threads:', num_threads, 'File Parallel Algo Time: ', total_time)#, 'Mb/s:', total_size/(total_time2))
+    
+#Data decomposition parallel method
 def alternateParallel(num_threads = 1):
   total_time = 0
+  
   #Partition Data
+  startTime = time.time()
   for i in range(len(images)):
     threads = []
     row, col = images[i].shape
@@ -73,21 +112,38 @@ def alternateParallel(num_threads = 1):
     for j in range(num_threads):
         if (j == num_threads - 1):
             threads.append(threading.Thread(target=parallelize, args=(i,j*interval,row)))
-        #break
         else:
             threads.append(threading.Thread(target=parallelize, args=(i,j*interval,(j + 1)*interval)))
-    startTime = time.time()
     for t in threads:
         t.start()
     for t in threads:
         t.join()
-    total_time += time.time() - startTime
+  endTime = time.time()
+  
+  total_time = endTime - startTime
+  for i in range(len(images)):
     cv2.imwrite('satOut/sat{}num_threads{}.jpg'.format(i, num_threads), images[i])
 
-  print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', total_time, 'Mb/s:', total_size/(total_time))
+  print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', total_time)#, 'Mb/s:', total_size/(total_time))
 
-loadImages()
-alternateParallel(16)
-images = []
-loadImages()
-serial()
+
+if (__name__ == '__main__'):
+    startTotSerTime = time.time()
+    loadImages()
+    serial()
+    endTotSerTime = time.time()
+    
+    images = []
+    startTotFileTime = time.time()
+    fileLevelParallel(4)
+    endTotFileTime = time.time()
+    
+    images = []
+    startTotParTime = time.time()
+    loadImages()
+    alternateParallel(16)
+    endTotParTime = time.time()
+    
+    print('\nSerial total Time:', endTotSerTime - startTotSerTime, \
+          "\nFile Parallel total Time:", endTotFileTime - startTotFileTime, \
+          "\nData Parallel total Time:", endTotParTime - startTotParTime)
