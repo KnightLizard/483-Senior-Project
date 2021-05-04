@@ -37,6 +37,7 @@ def preprocessing(id, left, right):
     
     #Water in the data set is mostly gray value 28, 45 reduces noise
     ret, test = cv2.threshold(test, 32, 255, cv2.THRESH_BINARY)
+    #ret, test = cv2.threshold(test, 45, 255, cv2.THRESH_BINARY+cv2.THRESH_OTSU)
     #test_edges = cv2.Canny(test, 2, 5)
 
     detectShoreline(test, id, left, right)
