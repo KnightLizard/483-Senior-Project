@@ -12,7 +12,7 @@ absPath = os.path.abspath(__file__)
 absPath = absPath[0:absPath.rindex('\\')]
 os.chdir(absPath)
 #os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
-total_size = 100
+total_size = 151
 
 #Load in all images in directory
 images = [] #List for all images to be read
@@ -89,7 +89,7 @@ def initWorkerData(numProcs):
 def fileLevelParallel(num_threads = 1):
   startTime = time.time()
   
-  numProcesses = 4
+  numProcesses = num_threads
   with multiprocessing.Pool(processes=numProcesses, initializer=initWorkerData, initargs=(numProcesses,)) as pool:
       pool.map(worker, range(numProcesses))
       
@@ -124,7 +124,7 @@ def alternateParallel(num_threads = 1):
   for i in range(len(images)):
     cv2.imwrite('satOut/sat{}num_threads{}.jpg'.format(i, num_threads), images[i])
 
-  print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', total_time)#, 'Mb/s:', total_size/(total_time))
+  print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', total_time, 'Mb/s:', total_size/(total_time))
 
 
 if (__name__ == '__main__'):
@@ -132,18 +132,35 @@ if (__name__ == '__main__'):
     loadImages()
     serial()
     endTotSerTime = time.time()
+    print('Serial total Time:', endTotSerTime - startTotSerTime)
     
     images = []
     startTotFileTime = time.time()
-    fileLevelParallel(4)
+    fileLevelParallel(1)
     endTotFileTime = time.time()
-    
+
     images = []
     startTotParTime = time.time()
     loadImages()
-    alternateParallel(16)
+    alternateParallel(1)
     endTotParTime = time.time()
     
-    print('\nSerial total Time:', endTotSerTime - startTotSerTime, \
-          "\nFile Parallel total Time:", endTotFileTime - startTotFileTime, \
-          "\nData Parallel total Time:", endTotParTime - startTotParTime)
+    print("File Parallel total Time (cores:", 1 , "):", endTotFileTime - startTotFileTime, \
+          "\nData Parallel total Time(cores:", 1 , "):", endTotParTime - startTotParTime, "\n")
+            
+    for i in range(2, 10, 2):
+        images = []
+        startTotFileTime = time.time()
+        fileLevelParallel(i)
+        endTotFileTime = time.time()
+    
+        images = []
+        startTotParTime = time.time()
+        loadImages()
+        alternateParallel(i)
+        endTotParTime = time.time()
+        
+        print("File Parallel total Time (cores:", i , "):", endTotFileTime - startTotFileTime, \
+          "\nData Parallel total Time(cores:", i , "):", endTotParTime - startTotParTime, "\n")
+    
+   
