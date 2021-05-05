@@ -1,6 +1,9 @@
+#File: Large image Final method.py
+#Description: A serial and a parallel implementation of the shoreline
+#  detection algorithm designed for use with smaller image files.
+
 import cv2
 import numpy as np
-import matplotlib.pyplot as plt
 import threading
 from sklearn.cluster import KMeans
 import time
@@ -10,7 +13,6 @@ import os
 absPath = os.path.abspath(__file__)
 absPath = absPath[0:absPath.rindex('\\')]
 os.chdir(absPath)
-#os.chdir(r'C:\Users\kille\Desktop\UMBC\Junior Year\CMSC 483\CMSC 483 Project')
 total_size = 1.67 #MB of data in image directory
 
 #Implements edge detection algorithm (Canny Algorithm)
@@ -114,7 +116,6 @@ def alternateParallel(num_threads = 1):
   print('Num Threads:', num_threads, 'Alt Parallel Algo Time: ', endTime - startTime, 'Mb/s:', total_size/(endTime - startTime))
 
 serial()
-#originalParallel()
 alternateParallel()
 for i in range(2, 34, 2):
   alternateParallel(i)
